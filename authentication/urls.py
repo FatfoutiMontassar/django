@@ -17,4 +17,5 @@ urlpatterns = [
     url(r'^settings/upload_picture/$', views.upload_picture,
         name='upload_picture'),
     url(r'^settings/password/$', views.password, name='password'),
+    url(r'^settings/message/$', views.message, name='message'),
 ]

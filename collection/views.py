@@ -8,8 +8,10 @@ def collection_all(request):
     if not request.user.is_authenticated():
         raise Http404
 
+    wishedCollections = request.user.profile.wishedCollections.all()
+
     ret = Collection.objects.filter(isActive=True)
-    return render(request,'collection/collections.html',{'collections':ret})
+    return render(request,'collection/collections.html',{'collections':ret,'wishedCollections':wishedCollections})
 
 def mineCollections(request):
     if not request.user.is_authenticated():
@@ -33,7 +35,29 @@ def editCollections(request,id):
         raise Http404
 
     if(request.method == 'POST'):
-        return HttpResponse()
+        name = request.POST.get('collectionName')
+        description = request.POST.get('collectionDesc')
+        image = request.FILES.get('collectionImageInput')
+        #print(type(image))
+        products = request.POST.get('relatedProducts') ;
+        collection = get_object_or_404(Collection,id=str(id))
+        collection.name = name
+        collection.description = description
+        if image:
+            collection.image = image
+        products = str(products)
+        #print products
+        products = products.split('&')
+        #print products
+        collection.save()
+        for pr in collection.products.all():
+            collection.products.remove(pr)
+
+        for i in range(len(products) -1 ):
+            pr = get_object_or_404(Product,id=str(products[i]))
+            collection.products.add(pr)
+        collection.save()
+        return redirect('/collections')
     else:
         collection = get_object_or_404(Collection,id=id)
         ret = []
@@ -44,11 +68,13 @@ def editCollections(request,id):
         for pr in collection.products.all():
             collectionProducts.append(pr)
 
-        return render(request,'collection/editCollection.html',
-                {   'collection':collection,
-                    'products':ret,
-                    'collectionProducts':collectionProducts,
-                })
+        #print(len(ret))
+        context = {
+            'collection':collection,
+            'products':ret,
+            'collectionProducts':collectionProducts,
+        }
+        return render(request,'collection/editCollection.html',context)
 
 def newCollection(request):
     if not request.user.is_authenticated():
@@ -58,7 +84,7 @@ def newCollection(request):
         name = request.POST.get('collectionName')
         description = request.POST.get('collectionDesc')
         image = request.FILES.get('collectionImageInput')
-        print type(image)
+        print(type(image))
         products = request.POST.get('relatedProducts') ;
         collection = Collection(user=request.user,name=name,description=description,image=image)
         products = str(products)

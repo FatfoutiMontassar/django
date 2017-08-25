@@ -1,4 +1,9 @@
 $(function(){
+
+  var d = new Date();
+  var n = d.getTimezoneOffset();
+  $("#timeOffset").attr('value',n)
+  //alert(n);
   $(".list-group-item").click(function(){
     // this function will change the state of a product from non selected to selected ..
     // and the reverse operation

@@ -8,7 +8,7 @@ $(function () {
     var csrf = $("#list-of-messages").attr("csrf")
     //alert(to)
     $.ajax({
-      url: '/messenger/add_new_messages/',
+        url: '/messenger/add_new_messages/',
       data:{
         'username':to,
         'csrfmiddlewaretoken': csrf,

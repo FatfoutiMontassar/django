@@ -27,6 +27,15 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+TIME_ZONE = 'Africa/Tunis'
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
 
 # Application definition
 
@@ -39,6 +48,7 @@ INSTALLED_APPS = [
     'reactions.apps.ReactionsConfig',
     'collection.apps.CollectionConfig',
     'discount.apps.DiscountConfig',
+    'quickstart.apps.QuickstartConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -50,6 +60,7 @@ INSTALLED_APPS = [
     #'kombu.transport.django',
     'django_celery_beat',
     'django_celery_results',
+    'rest_framework',
 ]
 
 CELERY_BROKER_URL = 'redis://localhost:6379'
@@ -57,7 +68,7 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'Africa/Tunis'
+CELERY_TIMEZONE = TIME_ZONE
 
 
 ''' added lines start here :
@@ -159,18 +170,17 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Africa/Tunis'
-
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)

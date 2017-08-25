@@ -6,6 +6,7 @@ from django.db import models
 from datetime import datetime
 
 from django.conf import  settings
+from discount.models import Discount
 
 # Create your models here.
 def rename(instance,name):
@@ -18,6 +19,7 @@ class Store(models.Model):
 	name = models.CharField(max_length=200)
 	description = models.TextField()
 	user = models.ForeignKey(settings.AUTH_USER_MODEL,default=1)
+	visitors = models.ManyToManyField(settings.AUTH_USER_MODEL,blank=True,related_name='stores_visiters')
 	created_at = models.DateTimeField(default=datetime.now, blank=True)
 	phoneNumber = models.CharField(max_length=200,null=True)
 	facebookPage = models.CharField(max_length=200,null=True)
@@ -37,6 +39,8 @@ class Store(models.Model):
 		if imgs:
 			img = imgs[0]
 		return img
+
+
 
 class Trader(models.Model):
 	user = models.OneToOneField(settings.AUTH_USER_MODEL)
@@ -87,6 +91,21 @@ class Product(models.Model):
 		if imgs:
 			img = imgs[0]
 		return img
+
+	def get_discount(self):
+		discounts = Discount.objects.filter(product=self,isActive=True).order_by("-percentage")
+		if(discounts):
+			return discounts[0]
+		else:
+			return None
+
+class albumImage(models.Model):
+	store = models.ForeignKey(Store,on_delete=models.CASCADE,null=True)
+	img = models.ImageField(null=True,upload_to=rename)
+	created_at = models.DateTimeField(default=datetime.now, blank=True)
+
+	def __str__(self):
+		return self.store.name
 
 class ProductMainImage(models.Model):
 	product = models.ForeignKey(Product, on_delete=models.CASCADE,null=True)

@@ -1,0 +1,41 @@
+{% extends 'messenger/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans 'Account Settings' %}{% endblock %}
+
+{% block main %}
+  <div class="page-header">
+    <h1>{% trans 'Account Settings' %}</h1>
+  </div>
+
+  <div class="row" style="margin-top: 2em;">
+    <div class="col-md-3">
+      {% include 'authentication/partial_settings_menu.html' with active='message' %}
+    </div>
+    <div class="col-md-9">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-success alert-dismissable">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+      <h3 style="margin-top: 0;margin-bottom:50px;">{% trans 'Change Welcoming Message' %}</h3>
+      <form role="form" class="form-horizontal" method="post" action="{% url 'message' %}">
+        {% csrf_token %}
+          <div class="form-group">
+            <label for="message" class="col-sm-3 control-label">message</label>
+            <div class="col-sm-9">
+              <input class="form-control" id="id_message" maxlength="250" name="message" type="text" value="{{message}}" />
+            </div>
+          </div>
+        <div class="form-group">
+          <div class="col-sm-offset-3 col-sm-9">
+            <button type="submit" class="btn btn-primary">{% trans 'Save' %}</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock main %}

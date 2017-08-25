@@ -7,14 +7,15 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from django.http import HttpResponse, Http404
-from .models import Product, Store, Contact, StoreImage, ProductMainImage, ProductSecImage , Trader
+from .models import Product, Store, Contact, StoreImage, ProductMainImage, ProductSecImage , Trader , albumImage
 from .forms import StoreForm, ProductForm, ContactForm, EditProductForm, StoreImageForm, addProductMainImageForm, \
-    productSImageForm , TraderForm
-
+    productSImageForm , TraderForm , albumImageForm
+from authentication.models import Profile
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator
 import re
 from django.views.generic import RedirectView
+from messenger.models import Message
 import json
 
 # Create your views here.
@@ -219,7 +220,7 @@ def search(request):
 	'''
     #srchFld = request.POST.get('srchFld')
     #categorie = request.POST.get('srchTxt')
-    wordList = re.sub("[^\w]", " ", str(srchFld) ).split()
+    wordList = re.sub("[^\]", " ", str(srchFld) ).split()
 
     products = Product.objects.all().order_by("-created_at")
 
@@ -567,7 +568,7 @@ def contact_create(request):
             instance = form.save(commit=False)
             instance.save()
         else:
-            print "Error !!"
+            print("Error !!")
         return redirect('/shop')
     else:
         form = ContactForm()
@@ -595,7 +596,7 @@ def addProduct(request, id):
         context = {
             'store': store,
         }
-        print store.name
+        print(store.name)
         return render(request, 'addProduct.html', context)
 
 
@@ -680,6 +681,123 @@ def details(request, id,idP="1"):
     #print str(id)
     return render(request, 'details.html', context)
 
+def storesAlbum(request,id):
+    if(request.method == 'POST'):
+        form = albumImageForm(request.POST or None, request.FILES or None)
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.store = Store.objects.get(id=id)
+            instance.save()
+            return redirect('/shop/storesAlbum/' + str(id))
+        else:
+            #print "error !!"
+            # print form.errors
+            return redirect('/shop/storesAlbum/' + str(id))
+        return redirect(request, '/shop/storesAlbum/' + str(id))
+    else:
+        form = albumImageForm()
+        store = get_object_or_404(Store,id=id)
+        imgs = albumImage.objects.filter(store=store)
+        context = {
+            'imgs':imgs,
+            'form':form,
+        }
+        return render(request,'album.html',context)
+
+def wishlist(request):
+    profile = get_object_or_404(Profile,user=request.user)
+    products = []
+    for pr in profile.wishedProducts.all():
+        products.append(pr)
+    collections = []
+    for cl in profile.wishedCollections.all():
+        collections.append(cl)
+    context = {
+        'products':products,
+        'collections':collections
+    }
+    return render(request,'wishlist.html',context)
+
+def view(request, id,idP="1"):
+    # print str(id)
+    Ptype = request.GET.get('Ptype', 'all')
+    #print Ptype
+
+    Prange = request.GET.get('Prange', 'all')
+    #print Prange
+
+    store = Store.objects.get(id=id)
+
+    # send message to store's owner
+    if request.user != store.user:
+        if(not (request.user in store.visitors.all())):
+            print("visit ...")
+            message = "This is an automatically generated message, welcome to my store ( " + str(store.name) + " ) , if you have any questions, please feel free :) "
+            if store.user.profile.message != None:
+                message = str(store.user.profile.message)
+            msg = Message.send_message(store.user,request.user,message).save()
+            store.visitors.add(request.user)
+
+
+    products = store.product_set.all().order_by("-created_at")
+
+    Pmin = request.GET.get('Pmin',0)
+    Pmax = request.GET.get('Pmax',10000)
+
+    products = products.filter(price__gte=Pmin)
+    products = products.filter(price__lte=Pmax)
+
+    if(Ptype=="handMade"):
+        products = products.filter(Ptype=1)
+    if(Ptype=="vintage"):
+        products = products.filter(Ptype=2)
+
+    nP = products.count()
+    imgs = StoreImage.objects.filter(store=store).order_by("-created_at")
+    pages = Paginator(products, 9)
+    vId = int(idP)
+    if( ( vId > int((nP+8)/9) ) or (vId < 1) ):
+        vId = 1
+    page = pages.page(vId)
+    values = []
+    for product in page:
+        x = getMainImage(product)
+        #print x
+        values.append((product, x,product.likes.all(),product.smiles.all(),product.wishes.all(),product.likes.count()+product.smiles.count()+product.wishes.count()))
+
+    intList = list(range(1, ((products.count() + 8) / 9) + 1))
+    idList = []
+    for i in intList:
+        idList.append(str(i))
+
+    filters = "?Ptype="+str(Ptype)+"&Pmin="+str(Pmin)+"&Pmax="+str(Pmax)
+    context = {
+        'flag':'yes',
+        'store': store,
+        'values': values,
+        'page': page,
+        'nP': nP,
+        'Pmin':Pmin,
+        'Pmax':Pmax,
+        'idList': idList,
+        'pageId': str(vId),
+        'filters':filters,
+        'Ptype':str(Ptype),
+        'Prange':str(Prange),
+        'idS': str(id),
+        'nC1': getCount(categoriesList[0]),
+        'nC2': getCount(categoriesList[1]),
+        'nC3': getCount(categoriesList[2]),
+        'nC4': getCount(categoriesList[3]),
+        'nC5': getCount(categoriesList[4]),
+        'nC6': getCount(categoriesList[5]),
+    }
+    if imgs:
+        context['img'] = imgs[0]
+
+    return render(request, 'discover.html', context)
+
+
 def addStoreImage(request, id):
     form = StoreImageForm(request.POST or None, request.FILES or None)
     if form.is_valid():
@@ -688,7 +806,7 @@ def addStoreImage(request, id):
         instance.save()
         return redirect('/shop/stores')
     else:
-        print "error !!"
+        print("error !!")
         #print form.errors
         # print form.errors
         return redirect('/shop/stores')

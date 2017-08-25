@@ -1,0 +1,43 @@
+.addProductToWishList {
+
+  background-image: url("/static/themes/images/heart.png");
+  background-repeat: no-repeat;
+  /*
+  background-size: 25px 25px;
+  background-color: black;
+  */
+  width: 25px;
+  height: 25px;
+  position:relative;
+}
+
+.addProductToWishList.active {
+
+  background-image: url("/static/themes/images/heartRed.png");
+  background-size: auto;
+  background-repeat: no-repeat;
+  width: 25px;
+  height: 25px;
+}
+
+.addCollectionToWishlist {
+
+  background-image: url("/static/themes/images/heart.png");
+  background-repeat: no-repeat;
+  /*
+  background-size: 25px 25px;
+  background-color: black;
+  */
+  width: 25px;
+  height: 25px;
+  position:relative;
+}
+
+.addCollectionToWishlist.active {
+
+  background-image: url("/static/themes/images/heartRed.png");
+  background-size: auto;
+  background-repeat: no-repeat;
+  width: 25px;
+  height: 25px;
+}

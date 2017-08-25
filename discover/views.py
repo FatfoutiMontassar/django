@@ -3,13 +3,14 @@ from django.shortcuts import render, redirect
 from shop.models import Product, Store, Contact, StoreImage, ProductMainImage, ProductSecImage , Trader
 from shop.forms import StoreForm, ProductForm, ContactForm, EditProductForm, StoreImageForm, addProductMainImageForm, \
     productSImageForm , TraderForm
-
+from django.http import HttpResponse, Http404
+from collection.models import Collection
 from django.core.paginator import Paginator
 from shop import views
 import re
 # Create your views here.
 categoriesList = ["Vetement et accessoires", "Bijoux", "Founiture creatives", "Mariages", "Maison", "Enfant et bebe"]
-
+from django.shortcuts import get_object_or_404
 def getCountFromList(categorie, tab):
     ret = 0
     for x in tab:
@@ -131,6 +132,9 @@ def search(request):
 
 
 def discover(request,idC="0",idP="1"):
+    if not request.user.is_authenticated():
+        return redirect('/authentication/login/')
+
     #print "hello from discovermore!" + str(id)
 
     Ptype = request.GET.get('Ptype', 'all')
@@ -167,6 +171,12 @@ def discover(request,idC="0",idP="1"):
 
     for product in page:
             x = product.get_image
+            if(product.get_discount()):
+                disc = product.get_discount()
+                #print disc.percentage
+            else:
+                print("no discount ...")
+
             liked  = False
             smiled = False
             wished = False
@@ -184,9 +194,11 @@ def discover(request,idC="0",idP="1"):
     for i in intList:
         idList.append(str(i))
 
+    wishedProducts = request.user.profile.wishedProducts.all()
     context = {
         'nPages': pages.num_pages,
         'values': values,
+        'wishedProducts':wishedProducts,
         'pageId': verifiedId,
         'idC':str(idC),
         'page': page,
@@ -203,3 +215,30 @@ def discover(request,idC="0",idP="1"):
         'nC6': getCount(categoriesList[5]),
     }
     return render(request, 'discover.html', context)
+
+
+def addToWishList(request):
+    tp = request.POST.get('type')
+    id = request.POST.get('id')
+    obj = None
+
+    ret = "added"
+
+    if(tp == "P"):
+        obj = get_object_or_404(Product,id=id)
+        if obj in request.user.profile.wishedProducts.all():
+            request.user.profile.wishedProducts.remove(obj)
+            ret = "removed"
+        else:
+            request.user.profile.wishedProducts.add(obj)
+            ret = "added"
+    else:
+        obj = get_object_or_404(Collection,id=id)
+        if obj in request.user.profile.wishedCollections.all():
+            request.user.profile.wishedCollections.remove(obj)
+            ret = "removed"
+        else:
+            request.user.profile.wishedCollections.add(obj)
+            ret = "added"
+
+    return HttpResponse(ret)

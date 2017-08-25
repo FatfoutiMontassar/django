@@ -77,19 +77,19 @@ def messages(request, username):
 
     products = []
     ouser = get_object_or_404(User,username=username)
-    print "other user's username :: " + str(ouser.username)+ "  " + str(hasattr(request.user , 'trader')) + "  " + str(hasattr(ouser,'trader'))
+    print("other user's username :: " + str(ouser.username)+ "  " + str(hasattr(request.user , 'trader')) + "  " + str(hasattr(ouser,'trader')) )
     if (hasattr(request.user , 'trader') and not hasattr(ouser,'trader')) or (not hasattr(request.user , 'trader') and hasattr(ouser,'trader') ):
-            print "ok!!!"
+            print("ok!!!")
     else:
-        print "not ok at all :p"
+        print("not ok at all :p")
 
-    print "other user ..."
+    print("other user ...")
     for store in ouser.store_set.all():
         #print store.name
         for product in store.product_set.all():
             products.append((product,getMainImage(product)))
 
-    print "connected user ..."
+    print("connected user ...")
     for store in request.user.store_set.all():
         #print store.name
         for product in store.product_set.all():
@@ -235,7 +235,7 @@ def get_products(request):
 def add_new_messages(request):
     print("add_new_messages function called ...")
     username = request.POST.get('username')
-    print username
+    print(str(username))
     active_conversation = username
     messages = Message.objects.filter(user=request.user,
                                       conversation__username=username,is_read=False)

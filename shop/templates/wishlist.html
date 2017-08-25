@@ -1,0 +1,54 @@
+{% include 'partials/header.html' %}
+
+{% load static %}
+
+<div class="row">
+<div class="span12" style="margin-top:50px;margin-left:90px;">
+  {% if collections %}
+    <h4 style="margin-left:20px;">Collections:</h4>
+  {% endif %}
+  {% for collection in collections %}
+    <div class="span3" style="height:330px;margin-left:20px; margin-bottom:20px;border : 1px solid rgb(220,220,220) ;">
+        <div style="overflow:hidden;width:100%;line-height:220px;height:220px;background-color:rgb(170,170,170);">
+          {% if collection.image %}
+          <img src="/media/{{collection.image}}" style="width:100%; vertical-align:middle;" alt="" />
+          {% else %}
+          <img src="/media/default.jpg" style="width:100%; vertical-align:middle;" alt="" />
+          {% endif %}
+        </div>
+        <center>
+          <h5>{{collection.name}}</h5>
+          <h6>{{collection.description}}</h6>
+        </center>
+        <center>
+          <a href="/collections/view/{{collection.id}}/" class="btn" >View</a>
+        </center>
+    </div>
+  {% endfor %}
+</div>
+<div class="span12" style="margin-top:50px;margin-left:90px;">
+  {% if products %}
+    <h4 style="margin-left:20px;">Products:</h4>
+  {% endif %}
+  {% for product in products %}
+    <div class="span3" style="height:330px;margin-left:20px; margin-bottom:20px;border : 1px solid rgb(220,220,220) ;">
+        <div style="overflow:hidden;width:100%;line-height:220px;height:220px;background-color:rgb(170,170,170);">
+          {% if product.get_image %}
+          <img src="/media/{{product.get_image.img}}" style="width:100%; vertical-align:middle;" alt="" />
+          {% else %}
+          <img src="/media/default.jpg" style="width:100%; vertical-align:middle;" alt="" />
+          {% endif %}
+        </div>
+        <center>
+          <h5>{{product.name}}</h5>
+          <h6>{{product.description}}</h6>
+        </center>
+        <center>
+          <a href="/shop/product_details/{{product.id}}/" class="btn" >View</a>
+        </center>
+    </div>
+  {% endfor %}
+</div>
+</div>
+
+{% include 'partials/footer.html' %}

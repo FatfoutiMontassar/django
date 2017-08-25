@@ -1,8 +1,10 @@
 from django.shortcuts import render , redirect
 from django.contrib.auth import authenticate
-from django.contrib.auth import login as auth_login, logout as auth_logout
+from django.contrib.auth import login as auth_login, logout as auth_logout , update_session_auth_hash
 from django.contrib.auth.models import User
-from authentication.forms import ProfileForm
+from authentication.forms import ProfileForm , ChangePasswordForm
+from authentication.models import Profile
+from django.http import HttpResponse, Http404
 # Create your views here.
 def register(request):
     if (request.method == 'POST'):
@@ -21,6 +23,8 @@ def register(request):
             else:
                 user = User.objects.create_user(username=email, password=password)
                 user.save()
+                profile = Profile(user=user)
+                profile.save()
                 user = authenticate(username=email, password=password)
                 if user is not None:
                     if user.is_active:
@@ -29,13 +33,13 @@ def register(request):
                 else:
                     return redirect('/authentication/login')
         else:
-            print "password and confirmation password dont match !"
+            print("password and confirmation password dont match !")
         return redirect('/authentication/login')
 
 
 def login(request):
     if (request.method == 'POST'):
-        print "login function from authentication called .."
+        print("login function from authentication called ..")
         email = request.POST['email']
         password = request.POST['password']
 
@@ -55,18 +59,27 @@ def login(request):
 def settings(request):
     user = request.user
     if request.method == 'POST':
-        form = ProfileForm(request.POST)
-        if form.is_valid():
-            user.first_name = form.cleaned_data.get('first_name')
-            user.last_name = form.cleaned_data.get('last_name')
-            user.profile.job_title = form.cleaned_data.get('job_title')
-            user.email = form.cleaned_data.get('email')
-            user.profile.url = form.cleaned_data.get('url')
-            user.profile.location = form.cleaned_data.get('location')
-            user.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Your profile was successfully edited.')
+        first_name = request.POST.get('first_name')
+        if first_name:
+            user.first_name = first_name
+        last_name = request.POST.get('last_name')
+        if last_name:
+            user.last_name = last_name
+        job_title = request.POST.get('job_title')
+        if job_title:
+            user.profile.job_title = job_title
+        email = request.POST.get('email')
+        if email:
+            user.email = email
+        url = request.POST.get('url')
+        if url:
+            user.profile.url = url
+        location = request.POST.get('location')
+        if location:
+            user.profile.location = location
+        user.profile.save()
+        user.save()
+        return redirect('/authentication/settings/')
 
     else:
         form = ProfileForm(instance=user, initial={
@@ -117,7 +130,32 @@ def upload_picture(request):
 
 def password(request):
     user = request.user
-    return render(request, 'authentication/password.html')
+    if request.method == 'POST':
+        new_password = request.POST.get('new_password')
+
+        user.set_password(new_password)
+        user.save()
+        update_session_auth_hash(request, user)
+        return redirect('/authentication/settings/password/')
+    else:
+        form = ChangePasswordForm(instance=user)
+    return render(request, 'authentication/password.html',{'form':form})
+
+def message(request):
+    if(request.method == 'POST'):
+        message = request.POST.get('message')
+        print(str(message))
+        request.user.profile.message = str(message)
+        request.user.profile.save()
+        return redirect('/authentication/settings/message/')
+    else:
+        message = ""
+        if request.user.profile.message != None:
+            message = str(request.user.profile.message)
+        context = {
+            'message':message
+        }
+        return render(request, 'authentication/message.html',context)
 
 def logout(request):
     auth_logout(request)

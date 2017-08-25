@@ -29,6 +29,8 @@ def newDiscount(request):
         collections = str(relatedCollections).split('&')
         percentage = request.POST.get('percentage')
         discountType = request.POST.get('Discount')
+        offset = request.POST.get('timeOffset')
+        offset = int(offset)
         discountType = str(discountType)
 
         if(discountType == "regular"):
@@ -84,22 +86,26 @@ def newDiscount(request):
 
             st = datetime(int(Date_Y), int(Date_M), int(Date_D),int(startTime_H),int(startTime_M))
             ed = datetime(int(Date_Y), int(Date_M), int(Date_D),int(endTime_H),int(endTime_M))
-            print st , " -- " , ed
+
+            stg = datetime(int(Date_Y), int(Date_M), int(Date_D),int(startTime_H)+(offset/60),int(startTime_M))
+            edg = datetime(int(Date_Y), int(Date_M), int(Date_D),int(endTime_H)+(offset/60),int(endTime_M))
+
+            print(st , " -- " , ed)
             for i in range(len(products)-1):
                 pid = products[i]
                 p = get_object_or_404(Product,id=pid)
                 discount = Discount(user=request.user,product=p,start=st,end=ed,discount_type="P",length_type="F",percentage=percentage)
                 discount.save()
-                activate.apply_async([discount.id],eta=st)
-                activate.apply_async([discount.id],eta=ed)
+                activate.apply_async([discount.id],eta=stg)
+                activate.apply_async([discount.id],eta=edg)
 
             for i in range(len(collections)-1):
                 cid = collections[i]
                 c = get_object_or_404(Collection,id=cid)
                 discount = Discount(user=request.user,collection=c,start=st,end=ed,discount_type="C",length_type="F",percentage=percentage)
                 discount.save()
-                activate.apply_async([discount.id],eta=st)
-                activate.apply_async([discount.id],eta=ed)
+                activate.apply_async([discount.id],eta=stg)
+                activate.apply_async([discount.id],eta=edg)
 
         return redirect('/discounts/')
     else:

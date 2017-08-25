@@ -120,7 +120,7 @@ overflow: auto;
     <div class="span12" style="border : 1px solid rgb(220,220,220) ; height:560px;margin-left:100px;background-color:rgb(240,240,240);margin-top:50px;margin-bottom:50px;">
       <h4 style="margin-left:30px; margin-bottom:20px;">Creer une nouvelle collection:</h4>
       <div class="span7" style="border : 1px solid rgb(220,220,220) ; height:490px; margin-left:30px; background-color:rgb(250,250,250);">
-        <form id="form" method="post" action="{% url 'newCollection' %}" style="margin-left:20px;margin-top:20px;" enctype="multipart/form-data">
+        <form id="form" method="post" action="{% url 'collections:newCollection' %}" style="margin-left:20px;margin-top:20px;" enctype="multipart/form-data">
           {% csrf_token %}
           <h5>Nom</h5>
           <input type="text" style="width:618px;" name="collectionName" id="nameId"><br>

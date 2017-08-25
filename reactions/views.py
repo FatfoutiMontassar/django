@@ -20,14 +20,14 @@ def reactionRemove(request,id):
     if(request.user in product.wishes.all() ):
         product.wishes.remove(request.user)
 
-    print "reaction removed successfully from reactions application..."
+    print("reaction removed successfully from reactions application...")
 
     return HttpResponse(product.likes.count() + product.smiles.count() + product.wishes.count())
 
 def reactionLike(request,id):
     if not request.user.is_authenticated():
         raise Http404
-    print "this should work !"
+    print("this should work !")
     product = get_object_or_404(Product,id=id)
     if(request.user in product.likes.all() ):
         product.likes.remove(request.user)
@@ -46,7 +46,7 @@ def reactionLike(request,id):
 
     product.likes.add(request.user)
     product.save()
-    print "reaction --Like-- added  successfully from reactions application..."
+    print("reaction --Like-- added  successfully from reactions application...")
 
     return HttpResponse(product.likes.count() + product.smiles.count() + product.wishes.count())
 
@@ -70,7 +70,7 @@ def reactionLove(request,id):
 
     product.smiles.add(request.user)
     product.save()
-    print "reaction --Love-- added successfully from reactions application..."
+    print("reaction --Love-- added successfully from reactions application...")
 
     return HttpResponse(product.likes.count() + product.smiles.count() + product.wishes.count())
 
@@ -94,6 +94,6 @@ def reactionWow(request,id):
 
     product.wishes.add(request.user)
     product.save()
-    print "reaction --Wow-- added successfully from reactions application..."
+    print("reaction --Wow-- added successfully from reactions application...")
 
     return HttpResponse(product.likes.count() + product.smiles.count() + product.wishes.count())

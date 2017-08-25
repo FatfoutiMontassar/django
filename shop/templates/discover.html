@@ -3,6 +3,14 @@
 {% load static %}
 
 <div id="mainBody">
+	{% if img %}
+		<div style="width:100%;height:200px;">
+			<center>
+				<img src="/media/{{img.img}}" style="height:200px;"/>
+			</center>
+		</div>
+		<hr>
+	{% endif %}
 	<div class="container">
 	<div class="row">
 
@@ -12,8 +20,8 @@
 </div>
 <!-- Sidebar end=============================================== -->
 
-
 	<div class="span9" >
+
 		<h4 style="float:left;">Products:</h4>
 		<style>
 			.glyphicon{
@@ -32,7 +40,12 @@
 			}
 
 		</style>
-
+<script type="text/javascript">
+	function share(id){
+		var left = (screen.width/2)-300
+		var fbpopup = window.open("https://www.facebook.com/sharer/sharer.php?u=127.0.0.1:8000/shop/product_details/"+ id +"/" , "pop", "width=600, height=400, scrollbars=no,left=" + left + "");
+	}
+</script>
 
 	</div>
 	<div class="span9">
@@ -40,9 +53,24 @@
 				<ul class="thumbnails">
 
 				{% for product , Pimg , liked , smiled , wished , sum in values %}
-							<li class="span3" product-id="{{ product.id }}" csrf="{{ csrf_token }}" >
-							<div class="thumbnail" style="height:300px;">
-							<a  style="height:210px; overflow:hidden;">
+							<li class="span3" product-id="{{ product.id }}" csrf="{{ csrf_token }}" discounts="{{product.get_discount.percentage}}" >
+							<div class="thumbnail" style="height:355px;position:relative;">
+							{% if product.get_discount %}
+							<div id="discountDiv" style="width:100%;height:40px;z-index: 1;margin-top:5px;position: absolute;">
+								<div style="float:right;background-color:rgb(255,140,0,0.7);width:70px;height:100%;margin-right:8px;">
+									<h5>{{product.get_discount.percentage}}% OFF</h5>
+								</div>
+								{% if product.get_discount.length_type == "F" %}
+								<div style="float:right;background-color:rgb(255,140,0,0.7);width:70px;height:100%;margin-right:5px;">
+									<h5>Flash</h5>
+								</div>
+								<div id="timeLeftDiv" style="float:right;background-color:rgb(255,140,0,0.7);width:70px;height:100%;margin-right:5px;">
+									<h5 id="timeLeft" secondsLeft="{{product.get_discount.secondsLeft}}">time left</h5>
+								</div>
+								{% endif %}
+							</div>
+							{% endif %}
+							<a  style="height:210px; overflow:hidden;margin-top:5px;z-index: 1;">
 								{% if Pimg %}
 									<img src="/media/{{product.get_image.img}}" style="width:100%;" alt=""/>
 								{% else %}
@@ -51,12 +79,19 @@
 							</a>
 							<div class="caption" style="bottom:0px; position: absolute; width:90%">
 								<h5>{{product.store.name}}: {{product.name}}</h5>
-								<!--
-								<h5 style="margin-top:0;">is active : {{product.isActive}}</h5>
-								-->
-
-							 <!--<center>-->
-
+								<center>
+									<div style="height:27px;width:70px;">
+											{% if product in wishedProducts %}
+												<div style="cursor:pointer;text-decoration:none;float:left;" class="addProductToWishList active" >
+											{% else %}
+												<div style="cursor:pointer;text-decoration:none;float:left;" class="addProductToWishList" >
+											{% endif %}
+											</div>
+												<div class="facebookShareLink" onclick="share({{product.id}});return false;" style="cursor:pointer;text-decoration:none;margin-left:20px;float:right;" title="partager"       >
+													<img src="{% static 'themes/images/share.png' %}" style="height:20px;" />
+												</div>
+									</div>
+								</center>
 							 <!-- start like block -->
 							 	<h4 style="text-align:center;">
 									<span class="like-btn" style="font-size:14px; text-align:left;text-decoration:none;" product-id="{{product.id}}" csrf="{{ csrf_token }}"> <!-- Default like button -->
@@ -80,75 +115,53 @@
 											</ul>
 											<span style="font-size:12px;margin-right:5px;" class="like-count">{{sum}}</span>
 									</span>
-
-									<!-- original likes interface , shouldn't change the model ..
-									{% if liked == True %}
-									<a href="#"  class="like unlike" style="font-size:15px;text-decoration:none;">
-										<img class="like-icon" src="{% static '/themes/images/thumb-up-blue.png' %}" style="height:18px;">
-										<span class="text" style="color:blue">Like</span>
-									</a>
-									{% else %}
-									<a href="#"  class="like" style="font-size:15px;text-decoration:none;">
-										<img class="like-icon" src="{% static '/themes/images/thumb-up.png' %}" style="height:18px;">
-										<span class="text" style="color:black;">Like</span>
-									</a>
-									{% endif %}
-
-									<span style="font-size:12px;" class="like-count">{{ product.likes.count }}</span>
-									-->
-
-
-									<!-- end like block  -->
-									<!--
-									{% if smiled == True %}
-									<a href="#"  class="smile unsmile" style="font-size:15px;text-decoration:none;">
-										<span class="text">U</span>
-									</a>
-									{% else %}
-									<a href="#"  class="smile" style="font-size:15px;text-decoration:none;">
-										<span class="text">S</span>
-									</a>
-									{% endif %}
-
-									<span style="font-size:12px;" class="smile-count">{{ product.smiles.count }}</span>
-
-									{% if wished == True %}
-									<a href="#"  class="wish unwish" style="font-size:15px;text-decoration:none;">
-										<span class="text">U</span>
-									</a>
-									{% else %}
-									<a href="#"  class="wish" style="font-size:15px;text-decoration:none;">
-										<span class="text">W</span>
-									</a>
-									{% endif %}
-
-									<span style="font-size:12px;" class="wish-count">{{ product.wishes.count }}</span>
-									-->
-									<!--
-									<a href="https://www.facebook.com/sharer/sharer.php?u=https://www.youtube.com/watch?v=dKb_IQtkh2A">
-									S</a>
-									-->
-
-									<!--
-									{% if product.isActive == True %}
-										<img src="{% static 'themes/images/active.png' %}" style="height:18px;" title="status">
-									{% elif product.isActive == False %}
-										<img src="{% static 'themes/images/notActive.png' %}" style="height:18px;" title="status">
-									{% else %}
-										<img src="{% static 'themes/images/notSure.png' %}" style="height:18px;" title="status">
-									{% endif %}
-									-->
 									<a class="btn" href="/shop/product_details/{{product.id}}">VIEW</a>
 									<a class="btn btn-primary">{{product.price}} Dt</a>
 								</h4>
-							 <!--</center>-->
 							</div>
 							</div>
 						</li>
 				{% endfor %}
 
 				</ul>
-        <div class="paginate paginate-dark wrapper" style="margin-top:30px; margin-bottom:30px;">
+				{% if flag %}
+				<div class="paginate paginate-dark wrapper" style="margin-top:30px; margin-bottom:30px;">
+            <ul>
+                 {% if page.has_previous %}
+										{% if idC %}
+											<li><a href="/shop/view/{{store.id}}/{{page.previous_page_number}}/{{filters}}" >&lang;</a></li>
+										{% else %}
+											<li><a href="/shop/view/{{store.id}}/{{page.previous_page_number}}/{{filters}}" >&lang;</a></li>
+										{% endif %}
+                  {% else %}
+                    <li><a>&lang;</a></li>
+                 {% endif %}
+
+                {% for id in idList %}
+                  {% if id == pageId %}
+                    <li><a class="active" >{{id}}</a></li>
+                  {% else %}
+										{% if idC %}
+											<li><a href="/shop/view/{{store.id}}/{{id}}/{{filters}}">{{id}}</a></li>
+										{% else %}
+											<li><a href="/shop/view/{{store.id}}/{{id}}/{{filters}}">{{id}}</a></li>
+										{% endif %}
+                  {% endif %}
+                {% endfor %}
+
+                {% if page.has_next  %}
+										{% if idC %}
+											<li><a href="/shop/view/{{store.id}}/{{page.next_page_number}}/{{filters}}">&rang;</a></li>
+										{% else %}
+											<li><a href="/shop/view/{{store.id}}/{{page.next_page_number}}/{{filters}}">&rang;</a></li>
+										{% endif %}
+                {% else %}
+                    <li><a>&rang;</a></li>
+                {% endif %}
+            </ul>
+        </div>
+				{% else %}
+				<div class="paginate paginate-dark wrapper" style="margin-top:30px; margin-bottom:30px;">
             <ul>
                  {% if page.has_previous %}
 										{% if idC %}
@@ -183,6 +196,8 @@
                 {% endif %}
             </ul>
         </div>
+				{% endif %}
+
 
 			</div>
 

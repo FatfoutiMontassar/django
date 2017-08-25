@@ -8,8 +8,8 @@ from datetime import datetime
 
 class Discount(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,default=1)
-    product = models.ForeignKey('shop.Product',null=True,related_name='discount_product')
-    collection = models.ForeignKey('collection.Collection',null=True,related_name='discount_collection')
+    product = models.ForeignKey('shop.Product',null=True,blank=True,related_name='discount_product')
+    collection = models.ForeignKey('collection.Collection',null=True,blank=True,related_name='discount_collection')
     start = models.DateTimeField(default=datetime.now, blank=True)
     end   = models.DateTimeField(default=datetime.now, blank=True)
     discount_type = models.CharField(max_length=1)
@@ -21,5 +21,9 @@ class Discount(models.Model):
 	)
     isActive = models.NullBooleanField(choices = activationChoices,default=False)
 
+    def secondsLeft(self):
+        delta = self.end.replace(tzinfo=None) - datetime.now()
+        return delta.seconds
+
     def __str__(self):
-        return self.user.username
+        return str(self.percentage)

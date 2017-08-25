@@ -1,6 +1,12 @@
 {% include 'partials/header.html' %}
 
 {% load static %}
+<script type="text/javascript">
+	function share(id){
+		var left = (screen.width/2)-300
+		var fbpopup = window.open("https://www.facebook.com/sharer/sharer.php?u=127.0.0.1:8000/collections/view/"+ id +"/" , "pop", "width=600, height=400, scrollbars=no,left=" + left + "");
+	}
+</script>
 <center style="margin-top:30px;">
   <h4 style="margin-top:25px;">
     <a class="btn" href="/collections/newCollection/">Creer une nouvelle collection</a>
@@ -10,7 +16,7 @@
 <div class="row">
 <div class="span12" style="margin-top:50px;margin-left:90px;">
   {% for collection in collections %}
-    <div class="span3" style="height:330px;margin-left:20px; margin-bottom:20px;border : 1px solid rgb(220,220,220) ;">
+    <div class="span3" style="height:330px;margin-left:20px; margin-bottom:20px;border : 1px solid rgb(220,220,220) ;" csrf="{{csrf_token}}" collection-id="{{collection.id}}">
         <div style="overflow:hidden;width:100%;line-height:220px;height:220px;background-color:rgb(170,170,170);">
           {% if collection.image %}
           <img src="/media/{{collection.image}}" style="width:100%; vertical-align:middle;" alt="" />
@@ -22,10 +28,38 @@
           <h5>{{collection.name}}</h5>
           <h6>{{collection.description}}</h6>
         </center>
+
         <center>
-          <a href="/collections/view/{{collection.id}}/" class="btn" >View</a>
-          <a href="/collections/edit/{{collection.id}}/" class="btn" >Edit</a>
+          <div style="height:27px;width:200px;">
+              {% if collection in wishedCollections %}
+                <div style="cursor:pointer;text-decoration:none;float:left;" class="addCollectionToWishlist active" >
+              {% else %}
+                <div style="cursor:pointer;text-decoration:none;float:left;" class="addCollectionToWishlist" >
+              {% endif %}
+              </div>
+                <div class="facebookShareLink" onclick="share({{product.id}});return false;" style="cursor:pointer;text-decoration:none;margin-left:20px;float:right;" title="partager"       >
+                    <img src="{% static 'themes/images/share.png' %}" style="height:20px;" />
+                </div>
+                <a href="/collections/view/{{collection.id}}/" class="btn" >View</a>
+                <a href="/collections/edit/{{collection.id}}/" class="btn" >Edit</a>
+          </div>
         </center>
+
+        <!--
+        <center>
+          <div style="height:27px;width:150px;">
+            {% if collection in wishedCollections %}
+              <div style="cursor:pointer;text-decoration:none;float:left;width:25px;height:25px;background-color:red;" class="addCollectionToWishList active" >
+              </div>
+            {% else %}
+              <div style="cursor:pointer;text-decoration:none;float:left;width:25px;height:25px;background-color:grey;" class="addCollectionToWishList" >
+              </div>
+            {% endif %}
+            <a href="/collections/view/{{collection.id}}/" class="btn" >View</a>
+            <a href="/collections/edit/{{collection.id}}/" class="btn" >Edit</a>
+          </div>
+        </center>
+        -->
     </div>
   {% endfor %}
 </div>

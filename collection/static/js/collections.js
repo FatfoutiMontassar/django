@@ -85,7 +85,6 @@ $(function(){
 
 });
 
-
 function deleteCollection(id){
 		var ans = confirm("Are you sure that you want to delete this Collection!!")
 		if(ans == true){
